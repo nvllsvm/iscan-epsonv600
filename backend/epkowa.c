@@ -5113,18 +5113,6 @@ sane_start (SANE_Handle handle)
       s->img.end = s->img.buf + len_img;
       memcpy (&s->img.ctx, &s->raw.ctx, sizeof (s->raw.ctx));
 
-      if (SANE_OPTION_IS_ACTIVE (s->opt[OPT_DESKEW].cap)
-          && s->val[OPT_DESKEW].b)
-        {
-          dip_deskew (s->dip, s->hw, s->frame_count, &s->img, s->val);
-        }
-
-      if (SANE_OPTION_IS_ACTIVE (s->opt[OPT_AUTOCROP].cap)
-          && s->val[OPT_AUTOCROP].b)
-        {
-          dip_autocrop (s->dip, s->hw, s->frame_count, &s->img, s->val);
-        }
-
       s->img.all_data_fetched = true;
       s->img.transfer_started = true;
       s->src = &s->img;
@@ -5714,24 +5702,12 @@ START_READ:
       s->raw.ptr = s->raw.buf;
     }
 
-    if ((SANE_CAP_EMULATED & s->opt[OPT_CCT_1].cap)
-        && s->hw->color_user_defined[s->val[OPT_COLOR_CORRECTION].w]
-        && SANE_FRAME_RGB == s->raw.ctx.format)
-    {
-      dip_apply_color_profile (s->dip, &s->raw, s->cct);
-    }
-
     if (s->hw->channel->interpreter)
     {
       s->hw->channel->interpreter->ftor0 (s->hw->channel,
                                          &s->raw.ctx,
                                           s->raw.ptr, s->raw.end);
     }
-
-    if (s->lut)
-      {
-        dip_apply_LUT (s->dip, &s->raw, s->lut);
-      }
 
     /* WARNING: The SANE specification normally uses zero to indicate
      * minimum intensity.  However, SANE_FRAME_GRAY images with a bit
