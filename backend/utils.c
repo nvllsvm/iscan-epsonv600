@@ -163,6 +163,52 @@ init_resolution_info (resolution_info *self, u_char *data)
   self->list[0] = self->size;
 }
 
+/*! Sets up a properly initialised resolution info object.
+ */
+void
+init_resolution_info_x820 (resolution_info *self)
+{
+  if (!self) return;
+
+  self->last =  0;		/* set defaults */
+  self->size = -1;
+  self->list = NULL;
+  self->deep = SANE_TRUE;
+
+  self->size = 0;
+  self->list = t_realloc (NULL, self->size + 1, SANE_Word);
+
+  if (!self->list)
+  {
+    err_major ("%s", strerror (ENOMEM));
+    self->size = -1;
+    return;
+  }
+
+  for (int i = 0; i < 6; i++)
+  {
+    void *p = self->list;
+
+    self->size++;
+    self->list = t_realloc (p, self->size + 1, SANE_Word);
+    if (!self->list)
+    {
+      delete (p);
+
+      err_major ("%s", strerror (ENOMEM));
+      self->size = -1;
+      return;
+    }
+  }
+  self->list[1] = 200;
+  self->list[2] = 400;
+  self->list[3] = 800;
+  self->list[4] = 1600;
+  self->list[5] = 3200;
+  self->list[6] = 6400;
+  self->list[0] = self->size;
+}
+
 /*! Releases resources held by \a self and resets it to default state.
  */
 void

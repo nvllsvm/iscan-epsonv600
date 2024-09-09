@@ -149,6 +149,7 @@ void _update_doc_size (extension *src, uint16_t value);
  */
 
 void init_resolution_info (resolution_info *self, byte *data);
+void init_resolution_info_x820 (resolution_info *self);
 void free_resolution_info (resolution_info *self);
 SANE_Status copy_resolution_info (resolution_info *dest,
                                   const resolution_info *src, SANE_Bool deep);

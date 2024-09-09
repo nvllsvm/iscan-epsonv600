@@ -1358,6 +1358,10 @@ create_epson_device (device **devp, channel* ch)
     }
   }
 
+  if (0 == strcmp_c ("GT-X820", dev->fw_name)) {
+    init_resolution_info_x820 (&dev->res);
+  }
+
   if (dev->fbf)
   {
     log_info ("  FBF: TL (%.2f, %.2f) -- BR (%.2f, %.2f) [in mm]",
@@ -6211,7 +6215,7 @@ filter_resolution_list (Epson_Scanner * s)
     {
       SANE_Word res = s->hw->resolution.list[i];
 
-      if ((res < 100) || (0 == (res % 300)) || (0 == (res % 400)))
+      if ((res < 100) || (0 == (res % 200)) || (0 == (res % 400)))
       {
 	s->hw->res.size++;
 	s->hw->res.list[s->hw->res.size] = res;
