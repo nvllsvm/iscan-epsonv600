@@ -2782,6 +2782,9 @@ scan_area_is_valid (Epson_Scanner *s)
     if (s->raw.ctx.bytes_per_line > max_req) rv = false;
   }
 
+  /* fix to allow full-area 6400dpi scanning */
+  if (0 == strcmp_c ("GT-X820", s->hw->fw_name)) return rv;
+
   if (s->hw->using_fs)
     {
       if (s->raw.ctx.pixels_per_line > s->hw->scan_width_limit) rv = false;
@@ -4016,12 +4019,25 @@ estimate_parameters (Epson_Scanner *s, SANE_Parameters * params)
 
   calculate_scan_area_max (s, &max_x, &max_y);
 
-  s->raw.ctx.pixels_per_line =
-    SANE_UNFIX (s->val[OPT_BR_X].w -
-		s->val[OPT_TL_X].w) / MM_PER_INCH * x_dpi * zoom / 100;
-  s->raw.ctx.lines =
-    SANE_UNFIX (s->val[OPT_BR_Y].w -
-		s->val[OPT_TL_Y].w) / MM_PER_INCH * y_dpi * zoom / 100;
+  /* calculate the pixels/lines only when the options are not at their max.
+   * the mm-to-in conversion introduces loss which can result in a
+   * less-than-max result. */
+  if (s->val[OPT_TL_X].w == SANE_FIX(0.0)
+          && s->val[OPT_BR_X].w == s->hw->src->x_range.max) {
+    s->raw.ctx.pixels_per_line = max_x;
+  } else {
+    s->raw.ctx.pixels_per_line =
+        SANE_UNFIX (s->val[OPT_BR_X].w -
+            s->val[OPT_TL_X].w) / MM_PER_INCH * x_dpi * zoom / 100;
+  }
+  if (s->val[OPT_TL_Y].w == SANE_FIX(0.0)
+          && s->val[OPT_BR_Y].w == s->hw->src->y_range.max) {
+    s->raw.ctx.lines = max_y;
+  } else {
+    s->raw.ctx.lines =
+        SANE_UNFIX (s->val[OPT_BR_Y].w -
+		    s->val[OPT_TL_Y].w) / MM_PER_INCH * y_dpi * zoom / 100;
+  }
 
   log_data ("max x:%d y:%d [in pixels]", max_x, max_y);
 
@@ -4081,11 +4097,15 @@ estimate_parameters (Epson_Scanner *s, SANE_Parameters * params)
      when scanning in monochrome mode.
      We use the largest multiple that is not larger than the original
      value.
+
+     Not needed when using the hw max.
    */
-  s->raw.ctx.pixels_per_line &= ~7;
-  if (1 == s->raw.ctx.depth)
-  {
-    s->raw.ctx.pixels_per_line &= ~31;
+  if (s->raw.ctx.pixels_per_line != max_x) {
+    s->raw.ctx.pixels_per_line &= ~7;
+    if (1 == s->raw.ctx.depth)
+    {
+      s->raw.ctx.pixels_per_line &= ~31;
+    }
   }
 
   s->raw.ctx.last_frame = SANE_TRUE;
