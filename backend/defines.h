@@ -31,20 +31,7 @@ extern "C"
 
 
 #ifndef __cplusplus
-
-/*  Use the C99 bool type if available
- */
-#ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
-#else
-
-/*! A C++ Boolean type and corresponding keywords for our C code.
- */
-typedef enum {
-  false = 0,
-  true
-} bool;
-#endif
 #endif
 
 
