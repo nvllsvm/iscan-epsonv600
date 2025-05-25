@@ -132,13 +132,13 @@ dip_init (const char *pkglibdir, SANE_Status *status)
 
   if (dip->plugin)
     {
-      dip->autocrop = esdip_crop;
+      //dip->autocrop = esdip_crop;
       dip->deskew   = esdip_turn;
     }
   else if (ENABLE_SANEI_MAGIC)  /* use free alternative API */
     {
       sanei_magic_init ();
-      dip->autocrop = magic_crop;
+      //dip->autocrop = magic_crop;
       dip->deskew   = magic_turn;
     }
 
